@@ -1,6 +1,9 @@
+import './pages/index.css';
+import { initialCards } from './scripts/cards';
+
 // @todo: Темплейт карточки
 
-const cardTemplate = document.querySelector("#card-template").content;
+const cardTemplate = document.querySelector("#card-template").content.querySelector('.places__item');
 
 // @todo: DOM узлы
 
@@ -15,7 +18,9 @@ function createCard(cardData, deleteCard) {
   const cardTitle = card.querySelector(".card__title");
   const cardDeleteButton = card.querySelector(".card__delete-button");
   cardDeleteButton.addEventListener("click", deleteCard);
+  
   cardTitle.textContent = cardData.name; // название карточки
+  // cardImg.setAttribute("src", `<%=require${cardData.link}%>`); // url изображения
   cardImg.setAttribute("src", cardData.link); // url изображения
   cardImg.setAttribute("alt", cardData.name); // alt изображения
   placesList.append(card);
