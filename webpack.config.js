@@ -54,5 +54,3 @@ module.exports = {
     new MiniCssExtractPlugin(),
   ],
 }
-
-// module.exports — это синтаксис экспорта в Node.js

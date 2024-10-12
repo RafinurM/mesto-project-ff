@@ -42,9 +42,8 @@ export function escCloser(event) {
 }
 
 function overlayClick(e) {
-  // !!!
-  debugger
-  //
-  
-  console.log(e);
+  const overlay = document.querySelector(".popup_is-opened");
+  if (e.target == overlay) {
+    closeModal();
+  }
 }
