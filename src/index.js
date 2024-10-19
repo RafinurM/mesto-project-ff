@@ -7,13 +7,14 @@ import { openModal, closeModal, overlayClick } from "./scripts/modal";
 
 const profileEditButton = document.querySelector(".profile__edit-button");
 const profileAddButton = document.querySelector(".profile__add-button");
+const popups = document.querySelectorAll(".popup"); // all popups
 const popupEdit = document.querySelector(".popup_type_edit");
 const popupAdd = document.querySelector(".popup_type_new-card");
 const popupImage = document.querySelector(".popup_type_image"); // popup image
 const placesList = document.querySelector(".places__list"); // card container
 const closeButtons = document.querySelectorAll(".popup__close"); // all x
-const editForm = document.forms['edit-profile']; // profile edit form
-const addForm = document.forms['new-place']; // new card add form
+const editForm = document.forms["edit-profile"]; // profile edit form
+const addForm = document.forms["new-place"]; // new card add form
 const cardImageTitle = document.querySelector(".popup__input_type_card-name");
 const cardImageUrl = document.querySelector(".popup__input_type_url");
 const nameInput = document.querySelector(".popup__input_type_name");
@@ -43,7 +44,7 @@ function addNewCardSubmit(evt) {
     name: cardImageTitle.value,
     link: cardImageUrl.value,
   };
-  placesList.prepend(createCard({card, deleteCard, openImg, likeCard}));
+  placesList.prepend(createCard({ card, deleteCard, openImg, likeCard }));
   closeModal(popupAdd);
 }
 
@@ -71,7 +72,10 @@ function openPopupAddCard() {
 
 // radars
 
-document.addEventListener("click", overlayClick); // add click to overlay
+popups.forEach((popup) => {
+  popup.addEventListener("click", overlayClick);
+  // add click to overlay
+});
 profileEditButton.addEventListener("click", () => openPopupProfile());
 profileAddButton.addEventListener("click", () => openPopupAddCard());
 editForm.addEventListener("submit", profileEditSubmit);
