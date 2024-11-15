@@ -12,7 +12,12 @@ export function authorization() {
   return fetch(`${config.baseUrl}/users/me`, {
     headers: config.headers,
   })
-    .then((res) => res.json())
+    .then((responce) => {
+      if (responce.ok) {
+        return responce.json();
+      }
+      return Promise.reject(`Ошибка ${responce.status}`);
+    })
     .then((data) => {
       return data;
     })
@@ -23,7 +28,12 @@ export function fetchCards() {
   return fetch(`${config.baseUrl}/cards`, {
     headers: config.headers,
   })
-    .then((res) => res.json())
+    .then((responce) => {
+      if (responce.ok) {
+        return responce.json();
+      }
+      return Promise.reject(`Ошибка ${responce.status}`);
+    })
     .then((cards) => {
       return cards;
     })
@@ -31,7 +41,7 @@ export function fetchCards() {
 }
 
 export function saveProfileData(name, job) {
-  fetch(`${config.baseUrl}/users/me`, {
+  return fetch(`${config.baseUrl}/users/me`, {
     method: "PATCH",
     headers: config.headers,
     body: JSON.stringify({
@@ -47,7 +57,12 @@ export function addCardAPI(card) {
     headers: config.headers,
     body: JSON.stringify(card),
   })
-    .then((res) => res.json())
+    .then((responce) => {
+      if (responce.ok) {
+        return responce.json();
+      }
+      return Promise.reject(`Ошибка ${responce.status}`);
+    })
     .then((card) => card)
     .catch((error) => alert(`Ой! Произошла ошибка: ${error}`));
 }
@@ -57,8 +72,14 @@ export function likeCardAPI(cardId) {
     method: "PUT",
     headers: config.headers,
   })
-    .then((responce) => responce.json())
-    .then((data) => data);
+    .then((responce) => {
+      if (responce.ok) {
+        return responce.json();
+      }
+      return Promise.reject(`Ошибка ${responce.status}`);
+    })
+    .then((data) => data)
+    .catch((error) => alert(`Ой! Произошла ошибка: ${error}`));
 }
 
 export function unlikeCardAPI(cardId) {
@@ -66,16 +87,29 @@ export function unlikeCardAPI(cardId) {
     method: "DELETE",
     headers: config.headers,
   })
-    .then((responce) => responce.json())
-    .then((data) => data);
+    .then((responce) => {
+      if (responce.ok) {
+        return responce.json();
+      }
+      return Promise.reject(`Ошибка ${responce.status}`);
+    })
+    .then((data) => data)
+    .catch((error) => alert(`Ой! Произошла ошибка: ${error}`));
 }
 
 export function changeAvatarAPI(avatar) {
-  fetch(`${config.baseUrl}/users/me/avatar`, {
+  return fetch(`${config.baseUrl}/users/me/avatar`, {
     method: "PATCH",
     headers: config.headers,
     body: JSON.stringify({
       avatar,
     }),
+  });
+}
+
+export function deleteCardAPI(cardId) {
+  return fetch(`${config.baseUrl}/cards/${cardId}`, {
+    method: "DELETE",
+    headers: config.headers,
   });
 }
