@@ -1,6 +1,3 @@
-import { deleteCardAPI, likeCardAPI, unlikeCardAPI } from "./api";
-import { closeModal, openModal } from "./modal";
-
 const cardTemplate = document
   .querySelector("#card-template")
   .content.querySelector(".places__item");
@@ -33,36 +30,13 @@ export function createCard(cardData) {
   });
 
   cardDeleteButton.addEventListener("click", (evt) => {
-    cardData.deleteCard(evt, cardData.card._id);
+    cardData.openPopupDelete(evt, cardData.card._id);
   });
 
   likeButton.addEventListener("click", (evt) => {
-    if (evt.target.classList.contains("card__like-button_is-active")) {
-      unlikeCardAPI(cardData.card._id).then((data) => {
-        likes.textContent = data.likes.length;
-      });
-    } else {
-      likeCardAPI(cardData.card._id).then((data) => {
-        likes.textContent = data.likes.length;
-      });
-    }
-    likeCard(evt);
+    cardData.likeCard(evt, cardData.card._id);
   });
   return card;
 }
 
-export function deleteCard(evt, cardId) {
-  const agreeButton = document.querySelector(".popup__agree-button"); // Кнопка "Да"
-  const popupDelete = document.querySelector(".popup_type_agree"); // Попап "Вы уверены?"
-  openModal(popupDelete);
-  agreeButton.addEventListener("click", (event) => {
-    event.preventDefault();
-    deleteCardAPI(cardId);
-    evt.target.closest(".card").remove();
-    closeModal(popupDelete);
-  });
-}
 
-export function likeCard(evt) {
-  evt.target.classList.toggle("card__like-button_is-active");
-}

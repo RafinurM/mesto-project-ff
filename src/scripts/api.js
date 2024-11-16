@@ -8,20 +8,21 @@ const config = {
   },
 };
 
+function checkResponce(responce) {
+  if (responce.ok) {
+    return responce.json();
+  }
+  return Promise.reject(`Ошибка ${responce.status}`);
+}
+
 export function authorization() {
   return fetch(`${config.baseUrl}/users/me`, {
     headers: config.headers,
   })
     .then((responce) => {
-      if (responce.ok) {
-        return responce.json();
-      }
-      return Promise.reject(`Ошибка ${responce.status}`);
+      return checkResponce(responce);
     })
-    .then((data) => {
-      return data;
-    })
-    .catch((error) => alert(`Ой! Произошла ошибка: ${error}`));
+    .then((data) => data);
 }
 
 export function fetchCards() {
@@ -29,15 +30,9 @@ export function fetchCards() {
     headers: config.headers,
   })
     .then((responce) => {
-      if (responce.ok) {
-        return responce.json();
-      }
-      return Promise.reject(`Ошибка ${responce.status}`);
+      return checkResponce(responce);
     })
-    .then((cards) => {
-      return cards;
-    })
-    .catch((error) => alert(`Ой! Произошла ошибка: ${error}`));
+    .then((cards) => cards);
 }
 
 export function saveProfileData(name, job) {
@@ -48,7 +43,9 @@ export function saveProfileData(name, job) {
       name: name,
       about: job,
     }),
-  }).catch((error) => alert(`Ой! Произошла ошибка: ${error}`));
+  }).then((responce) => {
+    return checkResponce(responce);
+  });
 }
 
 export function addCardAPI(card) {
@@ -58,13 +55,9 @@ export function addCardAPI(card) {
     body: JSON.stringify(card),
   })
     .then((responce) => {
-      if (responce.ok) {
-        return responce.json();
-      }
-      return Promise.reject(`Ошибка ${responce.status}`);
+      return checkResponce(responce);
     })
-    .then((card) => card)
-    .catch((error) => alert(`Ой! Произошла ошибка: ${error}`));
+    .then((card) => card);
 }
 
 export function likeCardAPI(cardId) {
@@ -73,13 +66,9 @@ export function likeCardAPI(cardId) {
     headers: config.headers,
   })
     .then((responce) => {
-      if (responce.ok) {
-        return responce.json();
-      }
-      return Promise.reject(`Ошибка ${responce.status}`);
+      return checkResponce(responce);
     })
-    .then((data) => data)
-    .catch((error) => alert(`Ой! Произошла ошибка: ${error}`));
+    .then((data) => data);
 }
 
 export function unlikeCardAPI(cardId) {
@@ -88,13 +77,9 @@ export function unlikeCardAPI(cardId) {
     headers: config.headers,
   })
     .then((responce) => {
-      if (responce.ok) {
-        return responce.json();
-      }
-      return Promise.reject(`Ошибка ${responce.status}`);
+      return checkResponce(responce);
     })
-    .then((data) => data)
-    .catch((error) => alert(`Ой! Произошла ошибка: ${error}`));
+    .then((data) => data);
 }
 
 export function changeAvatarAPI(avatar) {
@@ -104,12 +89,12 @@ export function changeAvatarAPI(avatar) {
     body: JSON.stringify({
       avatar,
     }),
-  });
+  }).then((responce) => checkResponce(responce));
 }
 
 export function deleteCardAPI(cardId) {
   return fetch(`${config.baseUrl}/cards/${cardId}`, {
     method: "DELETE",
     headers: config.headers,
-  });
+  }).then((responce) => checkResponce(responce));
 }

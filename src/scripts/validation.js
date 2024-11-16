@@ -11,18 +11,12 @@ function hideInputError(formElement, inputElement, configuration) {
 }
 
 function isValid(formElement, inputElement, configuration) {
-  const submitButton = formElement.querySelector(
-    configuration.submitButtonSelector
-  );
-
   if (inputElement.validity.patternMismatch) {
     inputElement.setCustomValidity(inputElement.dataset.errorMessage);
   } else {
     inputElement.setCustomValidity("");
   }
-
   if (!inputElement.validity.valid) {
-    submitButton.classList.add(configuration.inactiveButtonClass);
     showInputError(
       formElement,
       inputElement,
@@ -31,7 +25,6 @@ function isValid(formElement, inputElement, configuration) {
     );
   } else {
     hideInputError(formElement, inputElement, configuration);
-    submitButton.classList.remove(configuration.inactiveButtonClass);
   }
 }
 
@@ -42,11 +35,11 @@ function setEventListeners(formElement, configuration) {
   const buttonElement = formElement.querySelector(
     configuration.submitButtonSelector
   ); // choose btn
-  toggleButtonState(inputList, buttonElement);
+  toggleButtonState(inputList, buttonElement, configuration);
   inputList.forEach((inputElement) => {
     inputElement.addEventListener("input", () => {
       isValid(formElement, inputElement, configuration);
-      toggleButtonState(inputList, buttonElement);
+      toggleButtonState(inputList, buttonElement, configuration);
     });
   });
 }
@@ -70,13 +63,13 @@ function hasInvalidInput(inputList) {
   });
 }
 
-function toggleButtonState(inputList, buttonElement) {
+function toggleButtonState(inputList, buttonElement, configuration) {
   if (hasInvalidInput(inputList)) {
     buttonElement.disabled = true;
-    buttonElement.classList.add("popup__button_disabled");
+    buttonElement.classList.add(configuration.inactiveButtonClass);
   } else {
     buttonElement.disabled = false;
-    buttonElement.classList.remove("popup__button_disabled");
+    buttonElement.classList.remove(configuration.inactiveButtonClass);
   }
 }
 
@@ -84,9 +77,12 @@ export function clearValidation(form, configuration) {
   const inputList = Array.from(
     form.querySelectorAll(configuration.inputSelector)
   );
+  const button = form.querySelector(configuration.submitButtonSelector);
+  console.log(button)
   inputList.forEach((input) => {
     const errorElement = form.querySelector(`.${input.id}-error`);
     input.classList.remove(configuration.inputErrorClass);
     errorElement.textContent = "";
   });
+  toggleButtonState(inputList, button, configuration);
 }

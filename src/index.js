@@ -1,5 +1,5 @@
 import "./pages/index.css";
-import { createCard, deleteCard, likeCard } from "./scripts/card";
+import { createCard } from "./scripts/card";
 import { openModal, closeModal, overlayClick } from "./scripts/modal";
 import { enableValidation, clearValidation } from "./scripts/validation";
 import {
@@ -8,6 +8,9 @@ import {
   saveProfileData,
   addCardAPI,
   changeAvatarAPI,
+  deleteCardAPI,
+  likeCardAPI,
+  unlikeCardAPI,
 } from "./scripts/api";
 
 // DOM узлы
@@ -19,11 +22,13 @@ const popupEdit = document.querySelector(".popup_type_edit");
 const popupAdd = document.querySelector(".popup_type_new-card");
 const popupImage = document.querySelector(".popup_type_image"); // popup image
 const popupAvatar = document.querySelector(".popup_type_avatar"); // avatar change popup
+const popupDelete = document.querySelector(".popup_type_agree"); // Попап "Вы уверены?"
 const placesList = document.querySelector(".places__list"); // card container
 const closeButtons = document.querySelectorAll(".popup__close"); // all x
 const editForm = document.forms["edit-profile"]; // profile edit form
 const addForm = document.forms["new-place"]; // new card add form
 const avatarForm = document.forms["avatar-link"]; // avatar form
+const deleteForm = document.forms["agree"]; // agree form on delete
 const cardImageTitle = document.querySelector(".popup__input_type_card-name");
 const cardImageUrl = document.querySelector(".popup__input_type_url");
 const nameInput = document.querySelector(".popup__input_type_name");
@@ -32,6 +37,7 @@ const avatarInput = document.querySelector(".popup__input_type_avatar");
 const nameTitle = document.querySelector(".profile__title");
 const jobTItle = document.querySelector(".profile__description");
 const avatar = document.querySelector(".profile__image");
+
 const validationConfig = {
   formSelector: ".popup__form",
   inputSelector: ".popup__input",
@@ -41,20 +47,26 @@ const validationConfig = {
   errorClass: "popup__error_visible",
 };
 let userId = null;
+let cardID = null; // для API
+let cardDOM = null; // для удаления карточки со страницы
 
 function profileEditSubmit(evt) {
   // renew profile information
-  const savebutton = evt.target.querySelector(".button");
   evt.preventDefault();
   const name = nameInput.value;
   const job = jobInput.value;
-  nameTitle.textContent = name;
-  jobTItle.textContent = job;
+  const savebutton = evt.target.querySelector(".button");
   renderSaving(savebutton, true);
-  saveProfileData(name, job).then((data) => {
-    renderSaving(savebutton, false);
-    closeModal(popupEdit);
-  });
+  saveProfileData(name, job)
+    .then(() => {
+      nameTitle.textContent = name;
+      jobTItle.textContent = job;
+      closeModal(popupEdit);
+    })
+    .catch((error) => alert(`Ой! Произошла ошибка: ${error}`))
+    .finally(() => {
+      renderSaving(savebutton, false);
+    });
 }
 
 function addNewCardSubmit(evt) {
@@ -65,24 +77,32 @@ function addNewCardSubmit(evt) {
     name: cardImageTitle.value,
     link: cardImageUrl.value,
   };
-  addCardAPI(card).then((card) => {
-    placesList.prepend(
-      createCard({ card, deleteCard, openImg, likeCard, userId })
-    );
-    renderSaving(savebutton, false);
-    closeModal(popupAdd);
-  });
+  addCardAPI(card)
+    .then((card) => {
+      placesList.prepend(
+        createCard({ card, openPopupDelete, openImg, likeCard, userId })
+      );
+      closeModal(popupAdd);
+    })
+    .catch((error) => alert(`Ой! Произошла ошибка: ${error}`))
+    .finally(() => {
+      renderSaving(savebutton, false);
+    });
 }
 
 function changeAvatar(evt) {
   evt.preventDefault();
   const savebutton = evt.target.querySelector(".button");
   renderSaving(savebutton, true);
-  changeAvatarAPI(avatarInput.value).then(() => {
-    renderSaving(savebutton, false);
-    avatar.style.backgroundImage = `url(${avatarInput.value})`;
-    closeModal(popupAvatar);
-  });
+  changeAvatarAPI(avatarInput.value)
+    .then(() => {
+      avatar.style.backgroundImage = `url(${avatarInput.value})`;
+      closeModal(popupAvatar);
+    })
+    .catch((error) => alert(`Ой! Произошла ошибка: ${error}`))
+    .finally(() => {
+      renderSaving(savebutton, false);
+    });
 }
 
 function openImg(item) {
@@ -111,7 +131,41 @@ function openPopupAddCard() {
 
 function openPopupAvatarChange() {
   avatarForm.reset();
+  clearValidation(avatarForm, validationConfig);
   openModal(popupAvatar);
+}
+
+function openPopupDelete(evt, cardId) {
+  openModal(popupDelete);
+  cardDOM = evt.target.closest(".card"); // выбираем карточку на которой был клик по корзинке
+  cardID = cardId; // запоминаем ID карточки для передачи в API
+}
+
+function likeCard(evt, cardId) {
+  if (evt.target.classList.contains("card__like-button_is-active")) {
+    unlikeCardAPI(cardId)
+      .then((data) => {
+        evt.target.nextElementSibling.textContent = data.likes.length;
+        evt.target.classList.toggle("card__like-button_is-active");
+      })
+      .catch((error) => alert(`Ой! Произошла ошибка: ${error}`));
+  } else {
+    likeCardAPI(cardId)
+      .then((data) => {
+        console.log(data);
+        evt.target.nextElementSibling.textContent = data.likes.length;
+        evt.target.classList.toggle("card__like-button_is-active");
+      })
+      .catch((error) => alert(`Ой! Произошла ошибка: ${error}`));
+  }
+}
+
+function deleteCard() {
+  deleteCardAPI(cardID).then(() => {
+    cardDOM.remove();
+    closeModal(popupDelete);
+  })
+  .catch((error) => alert(`Ой! Произошла ошибка: ${error}`))
 }
 
 function renderSaving(button, isSaving) {
@@ -132,7 +186,7 @@ function init() {
       userId = authResponce._id;
       fetchCardResponce.forEach((card) => {
         placesList.append(
-          createCard({ card, deleteCard, openImg, likeCard, userId })
+          createCard({ card, openPopupDelete, openImg, likeCard, userId })
         );
       });
       return fetchCardResponce;
@@ -158,7 +212,7 @@ avatar.addEventListener("click", openPopupAvatarChange);
 editForm.addEventListener("submit", profileEditSubmit);
 addForm.addEventListener("submit", addNewCardSubmit);
 avatarForm.addEventListener("submit", changeAvatar);
-
+deleteForm.addEventListener("submit", deleteCard);
 // close buttons
 
 closeButtons.forEach((button) => {
